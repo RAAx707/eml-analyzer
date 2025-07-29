@@ -1,32 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RAAx707's EML Analyzer</title>
-  <!-- Tailwind CDN -->
+  <!-- Tailwind CDN with dark mode support -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
+<body class="bg-gray-900 text-gray-100 font-mono min-h-screen">
 
-  <header class="bg-gray-900 text-white p-4 shadow">
-    <h1 class="text-2xl font-bold text-center">RAAx707's EML Analyzer</h1>
+  <header class="bg-gray-800 p-6 shadow-md border-b border-gray-700">
+    <h1 class="text-3xl font-bold text-center tracking-wide">RAAx707's EML Analyzer</h1>
   </header>
 
-  <main class="max-w-4xl mx-auto mt-8 p-4 bg-white shadow-md rounded-lg">
+  <main class="p-8 w-full max-w-7xl mx-auto">
     <div class="mb-6">
-      <label for="fileInput" class="block text-lg font-semibold mb-2">Upload .eml File:</label>
-      <input type="file" id="fileInput" accept=".eml" class="p-2 border rounded w-full cursor-pointer bg-gray-50"/>
+      <label for="fileInput" class="block text-xl font-semibold mb-2">Upload .eml File:</label>
+      <input
+        type="file"
+        id="fileInput"
+        accept=".eml"
+        class="p-3 w-full bg-gray-800 text-gray-100 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+      />
     </div>
 
-    <div id="results" class="space-y-4">
-      <!-- Parsed results go here -->
+    <div id="results" class="space-y-6 text-sm">
+      <!-- Output injected here -->
     </div>
   </main>
 
-  <footer class="text-center text-sm text-gray-500 mt-12 mb-4">
-    Built by RAAx707 | v1.0 | GitHub Pages powered
+  <footer class="text-center text-gray-500 text-xs py-4 border-t border-gray-700 mt-12">
+    Built by RAAx707 • v1.0 • Forensics-ready • GitHub Pages Powered
   </footer>
 
   <script src="libs/eml-format.js"></script>
