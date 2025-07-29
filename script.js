@@ -10,35 +10,51 @@ document.getElementById('fileInput').addEventListener('change', function (event)
     const resultsDiv = document.getElementById('results');
     let html = '';
 
-    // Standard header blocks
-    html += formatHeaderBlock('From', headers['From']);
-    html += formatHeaderBlock('To', headers['To']);
-    html += formatHeaderBlock('Cc', headers['Cc']);
-    html += formatHeaderBlock('Bcc', headers['Bcc']);
-    html += formatHeaderBlock('Reply-To', headers['Reply-To']);
-    html += formatHeaderBlock('Subject', decodeMimeHeader(headers['Subject']));
-    html += formatHeaderBlock('Date', formatDate(headers['Date']));
+    // === BASIC HEADERS ===
+    html += createSection('Basic Info', [
+      formatHeaderBlock('From', headers['From']),
+      formatHeaderBlock('To', headers['To']),
+      formatHeaderBlock('Cc', headers['Cc']),
+      formatHeaderBlock('Bcc', headers['Bcc']),
+      formatHeaderBlock('Reply-To', headers['Reply-To']),
+      formatHeaderBlock('Subject', decodeMimeHeader(headers['Subject'])),
+      formatHeaderBlock('Date', formatDate(headers['Date']))
+    ]);
 
-    // Advanced headers
-    html += formatHeaderBlock('Message-ID', headers['Message-ID']);
-    html += formatHeaderBlock('Return-Path', headers['Return-Path']);
-    html += formatHeaderBlock('MIME-Version', headers['MIME-Version']);
-    html += formatHeaderBlock('Content-Type', headers['Content-Type']);
+    // === ADVANCED HEADERS ===
+    html += createSection('Advanced Info', [
+      formatHeaderBlock('Message-ID', headers['Message-ID']),
+      formatHeaderBlock('Return-Path', headers['Return-Path']),
+      formatHeaderBlock('MIME-Version', headers['MIME-Version']),
+      formatHeaderBlock('Content-Type', headers['Content-Type'])
+    ]);
 
-    // Received headers (multiple lines)
+    // === RECEIVED HEADERS ===
     if (headers['Received']) {
       const received = Array.isArray(headers['Received']) ? headers['Received'] : [headers['Received']];
-      html += `<div><strong>Received:</strong><ul>${received.map(r => `<li>${r}</li>`).join('')}</ul></div>`;
+      html += `
+        <div class="bg-gray-800 border border-gray-700 rounded p-4">
+          <h2 class="text-lg font-semibold text-blue-400 mb-2">Received Headers (${received.length})</h2>
+          <ul class="space-y-1 list-disc list-inside text-sm text-gray-300">
+            ${received.map(r => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>
+      `;
     }
 
-    // X-Headers
+    // === X-HEADERS (COLLAPSIBLE) ===
     const xHeaders = Object.keys(headers).filter(h => h.toLowerCase().startsWith('x-'));
     if (xHeaders.length) {
-      html += `<div><strong>Misc Headers:</strong><ul>`;
-      xHeaders.forEach(xh => {
-        html += `<li><strong>${xh}:</strong> ${headers[xh]}</li>`;
-      });
-      html += `</ul></div>`;
+      html += `
+        <details class="bg-gray-800 border border-gray-700 rounded p-4">
+          <summary class="cursor-pointer text-blue-400 font-semibold hover:underline text-lg">
+            Misc Headers (${xHeaders.length})
+          </summary>
+          <ul class="mt-2 space-y-1 text-sm text-gray-300 list-disc list-inside">
+            ${xHeaders.map(xh => `<li><strong>${xh}:</strong> ${headers[xh]}</li>`).join('')}
+          </ul>
+        </details>
+      `;
     }
 
     resultsDiv.innerHTML = html;
@@ -46,12 +62,25 @@ document.getElementById('fileInput').addEventListener('change', function (event)
   reader.readAsText(file);
 });
 
+// === UTILITY FUNCTIONS ===
+
+function createSection(title, blocks) {
+  const content = blocks.filter(Boolean).join('');
+  if (!content) return '';
+  return `
+    <div class="bg-gray-800 border border-gray-700 rounded p-4 space-y-2">
+      <h2 class="text-lg font-semibold text-blue-400 mb-2">${title}</h2>
+      ${content}
+    </div>
+  `;
+}
+
 function formatHeaderBlock(label, value) {
   if (!value) return '';
   if (['From', 'To', 'Cc', 'Bcc', 'Reply-To'].includes(label)) {
     value = formatAddressField(value);
   }
-  return `<p><strong>${label}:</strong> ${value}</p>`;
+  return `<p class="text-sm text-gray-300"><strong class="text-gray-400">${label}:</strong> ${value}</p>`;
 }
 
 function formatAddress(raw) {
