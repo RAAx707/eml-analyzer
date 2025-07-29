@@ -8,30 +8,52 @@ document.getElementById('fileInput').addEventListener('change', function (event)
     const headers = EMLParser.parseHeaders(emlText);
 
     const resultsDiv = document.getElementById('results');
+    let html = '';
 
-    resultsDiv.innerHTML = `
-      ${formatHeaderBlock('From', headers['From'])}
-      ${formatHeaderBlock('To', headers['To'])}
-      ${formatHeaderBlock('Cc', headers['Cc'])}
-      ${formatHeaderBlock('Bcc', headers['Bcc'])}
-      ${formatHeaderBlock('Reply-To', headers['Reply-To'])}
-      ${formatHeaderBlock('Subject', decodeMimeHeader(headers['Subject']))}
-      ${formatHeaderBlock('Date', formatDate(headers['Date']))}
-    `;
+    // Standard header blocks
+    html += formatHeaderBlock('From', headers['From']);
+    html += formatHeaderBlock('To', headers['To']);
+    html += formatHeaderBlock('Cc', headers['Cc']);
+    html += formatHeaderBlock('Bcc', headers['Bcc']);
+    html += formatHeaderBlock('Reply-To', headers['Reply-To']);
+    html += formatHeaderBlock('Subject', decodeMimeHeader(headers['Subject']));
+    html += formatHeaderBlock('Date', formatDate(headers['Date']));
+
+    // Advanced headers
+    html += formatHeaderBlock('Message-ID', headers['Message-ID']);
+    html += formatHeaderBlock('Return-Path', headers['Return-Path']);
+    html += formatHeaderBlock('MIME-Version', headers['MIME-Version']);
+    html += formatHeaderBlock('Content-Type', headers['Content-Type']);
+
+    // Received headers (multiple lines)
+    if (headers['Received']) {
+      const received = Array.isArray(headers['Received']) ? headers['Received'] : [headers['Received']];
+      html += `<div><strong>Received:</strong><ul>${received.map(r => `<li>${r}</li>`).join('')}</ul></div>`;
+    }
+
+    // X-Headers
+    const xHeaders = Object.keys(headers).filter(h => h.toLowerCase().startsWith('x-'));
+    if (xHeaders.length) {
+      html += `<div><strong>Misc Headers:</strong><ul>`;
+      xHeaders.forEach(xh => {
+        html += `<li><strong>${xh}:</strong> ${headers[xh]}</li>`;
+      });
+      html += `</ul></div>`;
+    }
+
+    resultsDiv.innerHTML = html;
   };
   reader.readAsText(file);
 });
 
-// Only render headers if they exist
 function formatHeaderBlock(label, value) {
   if (!value) return '';
-  if (label === 'From' || label === 'To' || label === 'Cc' || label === 'Bcc' || label === 'Reply-To') {
+  if (['From', 'To', 'Cc', 'Bcc', 'Reply-To'].includes(label)) {
     value = formatAddressField(value);
   }
   return `<p><strong>${label}:</strong> ${value}</p>`;
 }
 
-// Parse names + emails like "Name <email@example.com>"
 function formatAddress(raw) {
   const match = raw.match(/(.*)<(.+)>/);
   if (match) {
@@ -50,7 +72,6 @@ function formatAddressField(field) {
   return formatAddress(field);
 }
 
-// Decode Subject if MIME encoded
 function decodeMimeHeader(str) {
   if (!str || !str.startsWith('=?')) return str;
 
@@ -77,7 +98,6 @@ function decodeQuotedPrintable(text, charset) {
   return new TextDecoder(charset).decode(new TextEncoder().encode(decoded));
 }
 
-// Format date: "Tue, 30 Jul 2024, 04:17:22 PM"
 function formatDate(rawDate) {
   if (!rawDate) return 'N/A';
   try {
