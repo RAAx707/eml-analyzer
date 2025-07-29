@@ -36,7 +36,7 @@ document.getElementById('fileInput').addEventListener('change', function (event)
         <div class="bg-gray-800 border border-gray-700 rounded p-4">
           <h2 class="text-lg font-semibold text-blue-400 mb-2">Received Headers (${received.length})</h2>
           <ul class="space-y-1 list-disc list-inside text-sm text-gray-300">
-            ${received.map(r => `<li>${r}</li>`).join('')}
+            ${received.map(r => `<li class="break-words whitespace-pre-wrap font-mono text-xs">${r}</li>`).join('')}
           </ul>
         </div>
       `;
@@ -51,7 +51,11 @@ document.getElementById('fileInput').addEventListener('change', function (event)
             Misc Headers (${xHeaders.length})
           </summary>
           <ul class="mt-2 space-y-1 text-sm text-gray-300 list-disc list-inside">
-            ${xHeaders.map(xh => `<li><strong>${xh}:</strong> ${headers[xh]}</li>`).join('')}
+            ${xHeaders.map(xh => `
+              <li class="break-words whitespace-pre-wrap font-mono text-xs">
+                <strong class="text-gray-400">${xh}:</strong> ${headers[xh]}
+              </li>
+            `).join('')}
           </ul>
         </details>
       `;
@@ -80,7 +84,7 @@ function formatHeaderBlock(label, value) {
   if (['From', 'To', 'Cc', 'Bcc', 'Reply-To'].includes(label)) {
     value = formatAddressField(value);
   }
-  return `<p class="text-sm text-gray-300"><strong class="text-gray-400">${label}:</strong> ${value}</p>`;
+  return `<p class="text-sm text-gray-300 break-words whitespace-pre-wrap font-mono"><strong class="text-gray-400">${label}:</strong> ${value}</p>`;
 }
 
 function formatAddress(raw) {
