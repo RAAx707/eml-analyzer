@@ -4,12 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>RAAx707's EML Analyzer</title>
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <h1>RAAx707's EML Analyzer</h1>
-  <input type="file" id="fileInput" accept=".eml" />
-  <div id="results"></div>
+<body class="bg-gray-100 min-h-screen font-sans">
+
+  <header class="bg-gray-900 text-white p-4 shadow">
+    <h1 class="text-2xl font-bold text-center">RAAx707's EML Analyzer</h1>
+  </header>
+
+  <main class="max-w-4xl mx-auto mt-8 p-4 bg-white shadow-md rounded-lg">
+    <div class="mb-6">
+      <label for="fileInput" class="block text-lg font-semibold mb-2">Upload .eml File:</label>
+      <input type="file" id="fileInput" accept=".eml" class="p-2 border rounded w-full cursor-pointer bg-gray-50"/>
+    </div>
+
+    <div id="results" class="space-y-4">
+      <!-- Parsed results go here -->
+    </div>
+  </main>
+
+  <footer class="text-center text-sm text-gray-500 mt-12 mb-4">
+    Built by RAAx707 | v1.0 | GitHub Pages powered
+  </footer>
 
   <script src="libs/eml-format.js"></script>
   <script src="script.js"></script>
