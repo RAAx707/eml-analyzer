@@ -8,18 +8,30 @@ document.getElementById('fileInput').addEventListener('change', function (event)
     const headers = EMLParser.parseHeaders(emlText);
 
     const resultsDiv = document.getElementById('results');
+
     resultsDiv.innerHTML = `
-      <p><strong>From:</strong> ${headers['From'] ? formatAddress(headers['From']) : 'N/A'}</p>
-      <p><strong>To:</strong> ${headers['To'] ? formatAddressField(headers['To']) : 'N/A'}</p>
-      <p><strong>Subject:</strong> ${headers['Subject'] ? decodeMimeHeader(headers['Subject']) : 'N/A'}</p>
-      <p><strong>Date:</strong> ${headers['Date'] || 'N/A'}</p>
-      <p><strong>Reply-To:</strong> ${headers['Reply-To'] ? formatAddress(headers['Reply-To']) : 'N/A'}</p>
+      ${formatHeaderBlock('From', headers['From'])}
+      ${formatHeaderBlock('To', headers['To'])}
+      ${formatHeaderBlock('Cc', headers['Cc'])}
+      ${formatHeaderBlock('Bcc', headers['Bcc'])}
+      ${formatHeaderBlock('Reply-To', headers['Reply-To'])}
+      ${formatHeaderBlock('Subject', decodeMimeHeader(headers['Subject']))}
+      ${formatHeaderBlock('Date', formatDate(headers['Date']))}
     `;
   };
   reader.readAsText(file);
 });
 
-// Format "John Doe <john@example.com>" to "John Doe (john@example.com)"
+// Only render headers if they exist
+function formatHeaderBlock(label, value) {
+  if (!value) return '';
+  if (label === 'From' || label === 'To' || label === 'Cc' || label === 'Bcc' || label === 'Reply-To') {
+    value = formatAddressField(value);
+  }
+  return `<p><strong>${label}:</strong> ${value}</p>`;
+}
+
+// Parse names + emails like "Name <email@example.com>"
 function formatAddress(raw) {
   const match = raw.match(/(.*)<(.+)>/);
   if (match) {
@@ -30,7 +42,6 @@ function formatAddress(raw) {
   return raw.trim();
 }
 
-// Handle multiple recipients (To/Cc/Bcc)
 function formatAddressField(field) {
   if (!field) return 'N/A';
   if (Array.isArray(field)) {
@@ -39,7 +50,7 @@ function formatAddressField(field) {
   return formatAddress(field);
 }
 
-// Decode MIME-encoded subject lines
+// Decode Subject if MIME encoded
 function decodeMimeHeader(str) {
   if (!str || !str.startsWith('=?')) return str;
 
@@ -64,4 +75,25 @@ function decodeQuotedPrintable(text, charset) {
     String.fromCharCode(parseInt(hex, 16))
   );
   return new TextDecoder(charset).decode(new TextEncoder().encode(decoded));
+}
+
+// Format date: "Tue, 30 Jul 2024, 04:17:22 PM"
+function formatDate(rawDate) {
+  if (!rawDate) return 'N/A';
+  try {
+    const date = new Date(rawDate);
+    const weekday = date.toLocaleString('en-US', { weekday: 'short' });
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+
+    return `${weekday}, ${day} ${month} ${year}, ${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+  } catch {
+    return rawDate;
+  }
 }
