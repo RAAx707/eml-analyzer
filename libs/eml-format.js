@@ -9,7 +9,7 @@ const EMLParser = {
     for (let line of lines) {
       if (line === '') break; // End of headers
 
-      // Continuation line (e.g., folded Subject:)
+      // Continuation line (e.g., folded Subject)
       if (/^\s/.test(line) && currentHeader) {
         headers[currentHeader] += ' ' + line.trim();
         continue;
@@ -24,7 +24,7 @@ const EMLParser = {
         if (!headers[key]) {
           headers[key] = value;
         } else {
-          // Handle duplicates like multiple To:
+          // Support multiple headers like To:
           if (Array.isArray(headers[key])) {
             headers[key].push(value);
           } else {
